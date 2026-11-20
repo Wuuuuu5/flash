@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Each person can only reach their own cards.
+    // Replace YOUR_GMAIL_HERE with the Google account you sign in with,
+    // so nobody else can even create a card box on your project.
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == uid
+        && request.auth.token.email == "YOUR_GMAIL_HERE";
+    }
+  }
+}

@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Index Card Box</title>
+<meta name="theme-color" content="#2457c5">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cards">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#e9eef2; --surface:#f8fafb; --card:#ffffff; --fg:#17212b; --muted:#5b6b78;
+  --line:#c9d6e0; --rule:#b7cde0; --margin:#e0626b; --accent:#2457c5; --accent-fg:#fff;
+  --again:#c8404c; --good:#2457c5; --easy:#1f8a5b; --shadow:0 1px 2px rgba(20,40,60,.08),0 8px 24px rgba(20,40,60,.08);
+  --f-display:"Bricolage Grotesque",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#10161c; --surface:#18212a; --card:#1d2732; --fg:#e6edf3; --muted:#93a4b3;
+  --line:#2c3a47; --rule:#2a3e52; --margin:#d4646d; --accent:#7aa2ff; --accent-fg:#0b1422;
+  --again:#ef7781; --good:#7aa2ff; --easy:#5fcf9a; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:720px;margin:0 auto;padding-block:20px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+h1,h2{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:1.75rem}
+h2{font-size:1.25rem}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top .grow{flex:1;min-width:0}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+button{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:10px 14px;cursor:pointer;min-height:44px}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,.flip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+button.danger{color:var(--again)}
+button:disabled{opacity:.5;cursor:default}
+input,textarea{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+textarea{resize:vertical;min-height:72px}
+label{font-weight:700;font-size:.9rem;display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row > .grow{flex:1;min-width:0}
+.status{font-size:.9rem;color:var(--muted)}
+.status.err{color:var(--again)}
+.status.ok{color:var(--easy)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.decks{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.deck{position:relative;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px 16px 14px 26px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-height:120px;font-weight:400}
+.deck::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:2px;background:var(--margin);opacity:.7}
+.deck .name{font-family:var(--f-display);font-weight:700;font-size:1.15rem;overflow-wrap:anywhere}
+.deck .meta{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:.75rem;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font-weight:600}
+.pill.zero{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.cards{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.citem{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;padding:12px 14px;border-top:1px solid var(--line);align-items:start}
+.citem:first-child{border-top:0}
+.citem > div{min-width:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.citem .b{color:var(--muted)}
+.citem .box{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);white-space:nowrap}
+@media (max-width:520px){.citem{grid-template-columns:1fr auto}.citem .b{grid-column:1/2}}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:8px;align-items:center}
+.stage{perspective:1400px}
+.flip{position:relative;width:100%;aspect-ratio:5/3;max-width:100%;min-height:240px;cursor:pointer;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.2,1);border-radius:8px}
+.flip.on{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border-radius:8px;box-shadow:var(--shadow);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:28px 24px 28px 44px;overflow:auto;
+  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px);background-position:0 46px}
+.face::before{content:"";position:absolute;left:28px;top:0;bottom:0;width:2px;background:var(--margin);opacity:.75}
+.face.back{transform:rotateY(180deg)}
+.face .txt{font-size:clamp(1.2rem,3.6vw,1.9rem);line-height:1.35;text-align:center;white-space:pre-wrap;overflow-wrap:anywhere;max-height:100%;background:var(--card);padding:2px 6px;border-radius:4px}
+.face .tag{position:absolute;top:10px;right:14px;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.grade{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grade button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px}
+.grade small{font-family:var(--f-mono);font-weight:400;font-size:.72rem;color:var(--muted)}
+.grade .g0{border-color:var(--again);color:var(--again)}
+.grade .g1{border-color:var(--good);color:var(--good)}
+.grade .g2{border-color:var(--easy);color:var(--easy)}
+.progress{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.kbd{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.signin{align-items:flex-start}
+.foot{display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:.85rem}
+.foot .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+@media (prefers-reduced-motion:reduce){.flip{transition:none}}
+@media (hover:none){.kbd{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="top"><div class="grow"><div class="eyebrow">Index Card Box</div><h1>Your decks</h1></div></div>
+  <div class="panel"><div class="status">Loading…</div></div>
+</div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script type="module">
+/* ============================================================
+   PASTE YOUR FIREBASE SETTINGS HERE (from Firebase console →
+   Project settings → Your apps → Web app → "SDK setup and configuration")
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDiins3FvflsTEcVhj7mY7k00E_qg9Kk7s",
+  authDomain: "flashcard-ffc52.firebaseapp.com",
+  projectId: "flashcard-ffc52",
+  storageBucket: "flashcard-ffc52.firebasestorage.app",
+  messagingSenderId: "509215198324",
+  appId: "1:509215198324:web:dee273a0dddf3a25a81521"
+};
+/* ============================================================ */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, query, orderBy,
+  onSnapshot, addDoc, updateDoc, writeBatch }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app = document.getElementById('app');
+const DAY = 864e5;
+const INTERVALS = [0, 1, 3, 7, 16, 35, 90]; // days per box (Leitner-style)
+const MAXBOX = INTERVALS.length - 1;
+
+let auth, fs, user = null;
+let decks = [], cards = [];
+let loaded = {decks:false, cards:false};
+let unsubs = [];
+let view = {name:'home'};
+let editing = null, confirmDel = null, session = null;
+let msg = '', okMsg = '';
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const now = () => Date.now();
+const deckCards = id => cards.filter(c => c.deckId === id);
+const dueCards = id => deckCards(id).filter(c => (c.due || 0) <= now());
+const fmtDue = t => {
+  const d = (t || 0) - now();
+  if (d <= 0) return 'due now';
+  if (d < 36e5) return 'in ' + Math.ceil(d / 6e4) + ' min';
+  if (d < DAY) return 'in ' + Math.round(d / 36e5) + ' h';
+  return 'in ' + Math.round(d / DAY) + ' d';
+};
+const decksCol = () => collection(fs, 'users', user.uid, 'decks');
+const cardsCol = () => collection(fs, 'users', user.uid, 'cards');
+const cardRef = id => doc(fs, 'users', user.uid, 'cards', id);
+const deckRef = id => doc(fs, 'users', user.uid, 'decks', id);
+
+function fail(e){
+  console.error(e);
+  if (e && e.code === 'permission-denied') msg = 'This Google account is not allowed to use this card box. Sign out and sign in with your own account.';
+  else if (e && e.code === 'resource-exhausted') msg = 'The free daily limit was reached. Try again tomorrow.';
+  else msg = 'Could not save just now: ' + (e?.message || 'unknown error');
+  render();
+}
+
+/* ---------- start-up ---------- */
+if (firebaseConfig.apiKey === 'PASTE_HERE') {
+  app.innerHTML = head('Almost there') + `<div class="panel"><div class="status err">The Firebase settings haven't been added yet. Open <b>index.html</b>, find "PASTE YOUR FIREBASE SETTINGS HERE" near the bottom, and fill them in.</div></div>`;
+} else {
+  const fb = initializeApp(firebaseConfig);
+  auth = getAuth(fb);
+  fs = initializeFirestore(fb, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+  getRedirectResult(auth).catch(e => { msg = 'Sign-in failed: ' + e.message; render(); });
+  onAuthStateChanged(auth, u => {
+    unsubs.forEach(f => f()); unsubs = [];
+    decks = []; cards = []; loaded = {decks:false, cards:false};
+    user = u; view = {name:'home'}; session = null; editing = null;
+    if (u) listen();
+    render();
+  });
+}
+
+function listen(){
+  const onErr = e => fail(e);
+  unsubs.push(onSnapshot(query(decksCol(), orderBy('createdAt')), s => {
+    decks = s.docs.map(d => ({id:d.id, ...d.data()})); loaded.decks = true; render();
+  }, onErr));
+  unsubs.push(onSnapshot(query(cardsCol(), orderBy('createdAt')), s => {
+    cards = s.docs.map(d => ({id:d.id, ...d.data()})); loaded.cards = true; render();
+  }, onErr));
+}
+
+async function signIn(){
+  const provider = new GoogleAuthProvider();
+  try { await signInWithPopup(auth, provider); }
+  catch (e) {
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+      try { await signInWithRedirect(auth, provider); } catch (e2) { msg = 'Sign-in failed: ' + e2.message; render(); }
+    } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      msg = 'Sign-in failed: ' + e.message; render();
+    }
+  }
+}
+
+/* ---------- views ---------- */
+function head(title, eyebrow='Index Card Box', back=false, extra=''){
+  return `<div class="top">
+    ${back ? `<button class="ghost" data-act="home" aria-label="Back to decks">← Decks</button>` : ''}
+    <div class="grow"><div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(title)}</h1></div>${extra}</div>`;
+}
+
+function render(){
+  const active = document.activeElement;
+  if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') && view.name !== 'study' && user) {
+    if (render._pending) return;
+    render._pending = true;
+    active.addEventListener('blur', () => { render._pending = false; setTimeout(render, 150); }, {once:true});
+    return;
+  }
+  if (!user) return renderSignIn();
+  if (view.name === 'deck' && loaded.decks && !decks.find(d => d.id === view.id)) view = {name:'home'};
+  if (view.name === 'home') renderHome();
+  else if (view.name === 'deck') renderDeck();
+  else if (view.name === 'study') renderStudy();
+}
+
+function statusLine(){
+  let s = '';
+  if (msg) s += `<div class="status err" role="alert">${esc(msg)}</div>`;
+  if (okMsg) s += `<div class="status ok" role="status">${esc(okMsg)}</div>`;
+  return s;
+}
+
+function renderSignIn(){
+  app.innerHTML = head('Your decks') + statusLine() + `<div class="panel signin">
+    <h2>Sign in to open your cards</h2>
+    <div class="status">Your decks are saved to your Google account, so they're the same on your phone, laptop and PC.</div>
+    <button class="primary" data-act="signin">Sign in with Google</button></div>`;
+}
+
+function footer(){
+  return `<div class="foot"><span class="grow">Signed in as ${esc(user.email)}</span>
+    <button class="ghost" data-act="export">Back up cards</button>
+    <button class="ghost" data-act="import">Restore from backup</button>
+    <button class="ghost" data-act="signout">Sign out</button></div>`;
+}
+
+function renderHome(){
+  const totalDue = decks.reduce((n, d) => n + dueCards(d.id).length, 0);
+  let h = head('Your decks', totalDue ? `${totalDue} card${totalDue===1?'':'s'} due today` : 'Index Card Box');
+  h += statusLine();
+  h += `<form class="row" id="newDeck"><div class="grow"><input id="deckName" placeholder="New deck name, e.g. Spanish verbs" maxlength="80" autocomplete="off"></div><button class="primary" type="submit">Add deck</button></form>`;
+  if (!decks.length) {
+    h += `<div class="panel empty">${loaded.decks ? `<h2>No decks yet</h2><div>Type a name above and press <b>Add deck</b>. Then add cards with a question on the front and the answer on the back.</div>` : `<div>Loading your decks…</div>`}</div>`;
+  } else {
+    h += `<div class="decks">` + decks.map(d => {
+      const n = deckCards(d.id).length, due = dueCards(d.id).length;
+      return `<button class="deck" data-act="open" data-id="${d.id}">
+        <span class="name">${esc(d.name)}</span>
+        <span class="meta">${n} card${n===1?'':'s'}</span>
+        <span><span class="pill ${due?'':'zero'}">${due} due</span></span></button>`;
+    }).join('') + `</div>`;
+  }
+  h += footer();
+  app.innerHTML = h;
+}
+
+function renderDeck(){
+  const d = decks.find(x => x.id === view.id);
+  if (!d) { app.innerHTML = head('Deck', 'Index Card Box', true) + `<div class="panel empty">Loading…</div>`; return; }
+  const list = deckCards(d.id);
+  const q = (view.q || '').toLowerCase();
+  const shown = q ? list.filter(c => (c.front + ' ' + c.back).toLowerCase().includes(q)) : list;
+  const due = dueCards(d.id).length;
+  let h = head(d.name, `${list.length} cards · ${due} due`, true);
+  h += statusLine();
+  h += `<div class="row">
+    <button class="primary" data-act="study" ${list.length?'':'disabled'}>${due ? `Study ${due} due` : 'Study all'}</button>
+    ${due && due < list.length ? `<button data-act="studyall">Study all ${list.length}</button>` : ''}
+    <button data-act="shuffle" ${list.length?'':'disabled'}>Shuffle all</button></div>`;
+  if (editing === 'new') h += editor();
+  else h += `<div class="row"><button data-act="newcard">+ Add card</button><button data-act="bulk">Paste many</button></div>`;
+  if (view.bulk) h += `<form class="panel" id="bulkForm"><label for="bulkText">One card per line: front, then a | then back
+    <textarea id="bulkText" rows="6" placeholder="hola | hello&#10;gracias | thank you&#10;perro | dog"></textarea></label>
+    <div class="row"><button class="primary" type="submit">Add these cards</button><button type="button" data-act="bulkcancel">Cancel</button></div></form>`;
+  if (list.length > 6) h += `<input id="search" placeholder="Search cards" value="${esc(view.q||'')}" autocomplete="off">`;
+  if (!list.length) h += `<div class="panel empty"><h2>This deck is empty</h2><div>Press <b>Add card</b>, or <b>Paste many</b> to add a whole list at once.</div></div>`;
+  else h += `<div class="cards">` + shown.map(c => editing === c.id ? `<div style="padding:12px">${editor(c)}</div>` : `
+    <div class="citem"><div>${esc(c.front)}</div><div class="b">${esc(c.back)}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <span class="box">box ${c.box||0} · ${fmtDue(c.due)}</span>
+        <button class="ghost" data-act="edit" data-id="${c.id}">Edit</button>
+      </div></div>`).join('') + (shown.length ? '' : `<div class="empty">No cards match "${esc(view.q)}".</div>`) + `</div>`;
+  h += confirmDel === d.id
+    ? `<div class="panel row">Delete "${esc(d.name)}" and all ${list.length} cards? This can't be undone.<button class="danger" data-act="deldeck">Delete deck</button><button data-act="nodel">Keep it</button></div>`
+    : `<div class="row"><button class="ghost" data-act="renamedeck">Rename deck</button><button class="ghost danger" data-act="askdeldeck">Delete deck</button></div>`;
+  if (view.rename) h += `<form class="row" id="renameForm"><div class="grow"><input id="renameInput" value="${esc(d.name)}" maxlength="80"></div><button class="primary" type="submit">Save name</button></form>`;
+  app.innerHTML = h;
+  const s = document.getElementById('search');
+  if (s) s.addEventListener('input', () => { view.q = s.value; const pos = s.selectionStart; s.blur(); render._pending = false; renderDeck(); const n = document.getElementById('search'); n.focus(); n.setSelectionRange(pos, pos); });
+  const f = document.getElementById('cardFront'); if (f && !f.value) f.focus();
+}
+
+function editor(c){
+  const isNew = !c;
+  return `<form class="panel" id="cardForm" data-id="${c ? c.id : ''}">
+    <label for="cardFront">Front (question)<textarea id="cardFront" rows="2">${esc(c?.front)}</textarea></label>
+    <label for="cardBack">Back (answer)<textarea id="cardBack" rows="2">${esc(c?.back)}</textarea></label>
+    <div class="row"><button class="primary" type="submit">${isNew ? 'Add card' : 'Save'}</button>
+      ${isNew ? '<span class="kbd">Ctrl+Enter to add and start the next</span>' : ''}
+      <button type="button" data-act="canceledit">${isNew ? 'Done' : 'Cancel'}</button>
+      ${isNew ? '' : (confirmDel === c.id ? `<button type="button" class="danger" data-act="delcard" data-id="${c.id}">Yes, delete</button>` : `<button type="button" class="ghost danger" data-act="askdel" data-id="${c.id}">Delete</button>`)}
+    </div></form>`;
+}
+
+/* ---------- study ---------- */
+function beginStudy(mode){
+  const d = decks.find(x => x.id === view.id);
+  let pool = mode === 'due' ? dueCards(d.id) : deckCards(d.id).slice();
+  if (mode === 'due') pool.sort((a,b) => (a.due||0) - (b.due||0));
+  else pool.sort(() => Math.random() - .5);
+  session = {deckId:d.id, deckName:d.name, queue:pool.map(c => c.id), total:pool.length, done:0, again:0, flipped:false};
+  view = {name:'study', id:d.id};
+  render();
+}
+
+function renderStudy(){
+  const s = session;
+  const pct = s.total ? Math.round(s.done / s.total * 100) : 100;
+  let h = head(s.deckName, `Studying · ${s.done} of ${s.total}`, false, `<button data-act="endstudy">End session</button>`);
+  h += `<div class="progress" aria-hidden="true"><i style="width:${pct}%"></i></div>` + statusLine();
+  const c = cards.find(x => x.id === s.queue[0]);
+  if (!c) {
+    h += `<div class="panel empty"><h2>Session finished</h2><div>You went through ${s.total} card${s.total===1?'':'s'}${s.again ? `, and marked ${s.again} as "Again"` : ''}.</div>
+      <div class="row" style="justify-content:center"><button class="primary" data-act="endstudy">Back to deck</button></div></div>`;
+    app.innerHTML = h; return;
+  }
+  const box = c.box || 0;
+  const nextGood = INTERVALS[Math.min(box+1, MAXBOX)], nextEasy = INTERVALS[Math.min(box+2, MAXBOX)];
+  h += `<div class="stage"><div class="flip ${s.flipped?'on':''}" id="flip" data-act="flip" role="button" tabindex="0" aria-label="${s.flipped?'Showing answer':'Showing question'}. Tap to flip.">
+      <div class="face front"><span class="tag">Front</span><div class="txt">${esc(c.front)}</div></div>
+      <div class="face back"><span class="tag">Back</span><div class="txt">${esc(c.back)}</div></div></div></div>`;
+  if (!s.flipped) h += `<div class="row" style="justify-content:center"><button class="primary" data-act="flip" style="min-width:200px">Show answer</button><span class="kbd">Space to flip</span></div>`;
+  else h += `<div class="grade">
+      <button class="g0" data-act="grade" data-g="0">Again<small>soon · 1</small></button>
+      <button class="g1" data-act="grade" data-g="1">Good<small>${nextGood} day${nextGood===1?'':'s'} · 2</small></button>
+      <button class="g2" data-act="grade" data-g="2">Easy<small>${nextEasy} days · 3</small></button></div>`;
+  app.innerHTML = h;
+}
+
+async function grade(g){
+  const s = session, id = s.queue[0];
+  const c = cards.find(x => x.id === id); if (!c) return;
+  let box = c.box || 0, due;
+  if (g === 0) { box = 0; due = now() + 6e4; s.again++; s.queue.push(id); s.total++; }
+  else { box = Math.min(box + (g === 2 ? 2 : 1), MAXBOX); due = now() + INTERVALS[box] * DAY; }
+  s.queue.shift(); s.done++; s.flipped = false;
+  render();
+  try { await updateDoc(cardRef(id), {box, due, reviewed: now()}); } catch(e){ fail(e); }
+}
+
+/* ---------- backup ---------- */
+function exportCards(){
+  const data = { app: 'index-card-box', version: 1, exportedAt: new Date().toISOString(),
+    decks: decks.map(({id, ...r}) => ({id, ...r})), cards: cards.map(({id, ...r}) => ({id, ...r})) };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `flashcards-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  okMsg = `Saved a backup of ${decks.length} decks and ${cards.length} cards.`; render();
+}
+
+async function importCards(file){
+  let data;
+  try { data = JSON.parse(await file.text()); } catch { msg = 'That file is not a backup from this app.'; render(); return; }
+  if (!Array.isArray(data.decks) || !Array.isArray(data.cards)) { msg = 'That file is not a backup from this app.'; render(); return; }
+  okMsg = 'Restoring…'; render();
+  try {
+    const writes = [];
+    for (const d of data.decks) { const {id, ...r} = d; if (id) writes.push([deckRef(String(id)), r]); }
+    for (const c of data.cards) { const {id, ...r} = c; if (id && r.deckId) writes.push([cardRef(String(id)), r]); }
+    for (let i = 0; i < writes.length; i += 400) {
+      const b = writeBatch(fs);
+      writes.slice(i, i + 400).forEach(([ref, r]) => b.set(ref, r));
+      await b.commit();
+    }
+    okMsg = `Restored ${data.decks.length} decks and ${data.cards.length} cards.`;
+  } catch (e) { okMsg = ''; fail(e); return; }
+  render();
+}
+const fileInput = document.getElementById('importFile');
+fileInput.addEventListener('change', () => { const f = fileInput.files[0]; fileInput.value = ''; if (f) importCards(f); });
+
+/* ---------- events ---------- */
+app.addEventListener('click', async ev => {
+  const t = ev.target.closest('[data-act]'); if (!t) return;
+  const a = t.dataset.act, id = t.dataset.id;
+  msg = ''; okMsg = '';
+  if (a === 'signin') { signIn(); return; }
+  else if (a === 'signout') { await signOut(auth); return; }
+  else if (a === 'export') { exportCards(); return; }
+  else if (a === 'import') { fileInput.click(); return; }
+  else if (a === 'home') { view = {name:'home'}; editing = null; confirmDel = null; }
+  else if (a === 'open') { view = {name:'deck', id}; editing = null; confirmDel = null; }
+  else if (a === 'study') { beginStudy(dueCards(view.id).length ? 'due' : 'all'); return; }
+  else if (a === 'studyall' || a === 'shuffle') { beginStudy('all'); return; }
+  else if (a === 'endstudy') { view = {name:'deck', id:session.deckId}; session = null; }
+  else if (a === 'flip') { session.flipped = !session.flipped; }
+  else if (a === 'grade') { grade(+t.dataset.g); return; }
+  else if (a === 'newcard') { editing = 'new'; view.bulk = false; }
+  else if (a === 'edit') { editing = id; confirmDel = null; }
+  else if (a === 'canceledit') { editing = null; confirmDel = null; }
+  else if (a === 'bulk') { view.bulk = true; editing = null; }
+  else if (a === 'bulkcancel') { view.bulk = false; }
+  else if (a === 'askdel') { confirmDel = id; }
+  else if (a === 'delcard') {
+    editing = null; confirmDel = null;
+    try { const b = writeBatch(fs); b.delete(cardRef(id)); await b.commit(); } catch(e){ fail(e); return; }
+  }
+  else if (a === 'askdeldeck') { confirmDel = view.id; }
+  else if (a === 'nodel') { confirmDel = null; }
+  else if (a === 'renamedeck') { view.rename = !view.rename; }
+  else if (a === 'deldeck') {
+    const did = view.id; confirmDel = null; view = {name:'home'}; render();
+    try {
+      const refs = deckCards(did).map(c => cardRef(c.id)); refs.push(deckRef(did));
+      for (let i = 0; i < refs.length; i += 400) { const b = writeBatch(fs); refs.slice(i, i + 400).forEach(r => b.delete(r)); await b.commit(); }
+    } catch(e){ fail(e); }
+    return;
+  }
+  document.activeElement?.blur?.(); render._pending = false;
+  render();
+});
+
+app.addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const f = ev.target; msg = ''; okMsg = '';
+  const settle = () => { document.activeElement?.blur?.(); render._pending = false; };
+  if (f.id === 'newDeck') {
+    const name = document.getElementById('deckName').value.trim(); if (!name) return;
+    document.getElementById('deckName').value = '';
+    try { await addDoc(decksCol(), {name, createdAt: now()}); } catch(e){ fail(e); }
+  } else if (f.id === 'renameForm') {
+    const name = document.getElementById('renameInput').value.trim(); if (!name) return;
+    view.rename = false; settle();
+    try { await updateDoc(deckRef(view.id), {name}); } catch(e){ fail(e); return; }
+    render();
+  } else if (f.id === 'cardForm') {
+    const front = document.getElementById('cardFront').value.trim(), back = document.getElementById('cardBack').value.trim();
+    if (!front || !back) { msg = 'Fill in both the front and the back.'; settle(); render(); return; }
+    const id = f.dataset.id;
+    try {
+      if (id) { editing = null; settle(); await updateDoc(cardRef(id), {front, back}); render(); }
+      else {
+        document.getElementById('cardFront').value = ''; document.getElementById('cardBack').value = '';
+        document.getElementById('cardFront').focus();
+        await addDoc(cardsCol(), {deckId: view.id, front, back, box: 0, due: 0, createdAt: now()});
+      }
+    } catch(e){ fail(e); }
+  } else if (f.id === 'bulkForm') {
+    const lines = document.getElementById('bulkText').value.split('\n').map(l => l.split('|'))
+      .filter(p => p.length >= 2 && p[0].trim() && p.slice(1).join('|').trim());
+    if (!lines.length) { msg = 'No cards found. Put a | between the front and the back on each line.'; settle(); render(); return; }
+    view.bulk = false; settle(); render();
+    try {
+      let t = now();
+      for (let i = 0; i < lines.length; i += 400) {
+        const b = writeBatch(fs);
+        lines.slice(i, i + 400).forEach(p => b.set(doc(cardsCol()), {deckId: view.id, front: p[0].trim(), back: p.slice(1).join('|').trim(), box: 0, due: 0, createdAt: t++}));
+        await b.commit();
+      }
+    } catch(e){ fail(e); }
+  }
+});
+
+document.addEventListener('keydown', ev => {
+  const tag = ev.target.tagName;
+  if (tag === 'TEXTAREA' && ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); ev.target.form?.requestSubmit(); return; }
+  if (view.name !== 'study' || tag === 'INPUT' || tag === 'TEXTAREA' || !session) return;
+  const hasCard = cards.find(x => x.id === session.queue[0]);
+  if (ev.key === ' ') { ev.preventDefault(); if (hasCard) { session.flipped = !session.flipped; render(); } }
+  else if (session.flipped && ['1','2','3'].includes(ev.key)) grade(+ev.key - 1);
+  else if (ev.key === 'Escape') { view = {name:'deck', id:session.deckId}; session = null; render(); }
+});
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
